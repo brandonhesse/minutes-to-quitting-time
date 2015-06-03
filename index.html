@@ -9,7 +9,7 @@
 <script>
   function nextFriday(date) {
     var input, output;
-    input = moment(date);
+    input = moment.isMoment(date) ? date : moment(date);
     output = input.clone().startOf('week').day(5).hour(17).minute(0).second(0);
     return output > input ? output : output.add(7, 'days');
   }
@@ -49,22 +49,48 @@
     'a man who dares to waste one hour of time has not discovered the value of life.'
   ];
 
+  timer.Timer = function __buildTimer(time) {
+    var obj = Object.create({
+      getMinutesFromNow: function __diff() {
+        return this.time.diff(moment(), 'minutes');
+      },
+
+      getSecondsFromNow: function __diff() {
+        return this.time.diff(moment(), 'seconds');
+      },
+
+      isFinished: function __complete() {
+        return this.time < moment();
+      }
+    });
+
+    obj.time = time;
+
+    return obj;
+  };
+
   timer.vm = (function () {
     var vm = {};
 
     vm.init = function () {
-      vm.time = moment();
-      vm.endTime = nextFriday(vm.time);
+      vm.endTime = timer.Timer(nextFriday());
       vm.remaining = m.prop(0);
       vm.phrase = m.prop(sample(timer.phrases));
-      vm.getTimeDiff();
     };
 
-    vm.getTimeDiff = function () {
-      vm.time = moment();
-      var remaining = vm.endTime.diff(vm.time, 'minutes');
-      vm.remaining(remaining);
-      return remaining < 0;
+    vm.update = function () {
+      m.startComputation();
+
+      vm.remaining(vm.endTime.getMinutesFromNow());
+      if(vm.endTime.isFinished()) {
+        vm.endTime = timer.Timer(nextFriday());
+      }
+
+      if (randomInt(0, 9) < 1) { // Random change
+        timer.vm.phrase(sample(timer.phrases));
+      }
+
+      m.endComputation();
     };
 
     return vm;
@@ -85,24 +111,12 @@
     ]);
   };
 
-  timer.tick = function __updateTick() {
-    m.startComputation();
-    var finished = timer.vm.getTimeDiff();
-    if (finished) {
-      timer.vm.endTime = nextFriday(timer.vm.time);
-    }
-    if (randomInt(0, 9) < 1) {
-      timer.vm.phrase(sample(timer.phrases));
-    }
-    m.endComputation();
-  };
-
   timer.controller = function () {
     timer.vm.init();
-    timer.tick();
+    timer.vm.update();
   };
 
   m.mount(document.body, {controller: timer.controller, view: timer.view});
-  intervalId = setInterval(timer.tick, 5000);
+  intervalId = setInterval(timer.vm.update, 5000);
 </script>
 </body>
