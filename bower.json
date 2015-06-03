@@ -1,0 +1,23 @@
+{
+  "name": "minuteCountdown",
+  "version": "0.1.0",
+  "authors": [
+    "Brandon <bdhesse@gmail.com>"
+  ],
+  "description": "Joke program that counts down the minute to a specified date",
+  "main": "index",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "q": "~1.0",
+    "lodash": "~3.9.3",
+    "mithril": "~0.2.0",
+    "momentjs": "~2.10.3"
+  }
+}
