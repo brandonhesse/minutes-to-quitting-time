@@ -2,7 +2,6 @@
 <head>
   <link rel="stylesheet" href="css/style.css"/>
   <title>Watch these minutes fly by...</title>
-
 </head>
 <body>
 <script src="bower_components/mithril/mithril.min.js"></script>
@@ -58,13 +57,14 @@
       vm.endTime = nextFriday(vm.time);
       vm.remaining = m.prop(0);
       vm.phrase = m.prop(sample(timer.phrases));
+      vm.getTimeDiff();
+    };
 
-      vm.getTimeDiff = function () {
-        vm.time = moment();
-        var remaining = vm.endTime.diff(vm.time, 'minutes');
-        vm.remaining(remaining);
-        return remaining < 0;
-      };
+    vm.getTimeDiff = function () {
+      vm.time = moment();
+      var remaining = vm.endTime.diff(vm.time, 'minutes');
+      vm.remaining(remaining);
+      return remaining < 0;
     };
 
     return vm;
@@ -99,7 +99,6 @@
 
   timer.controller = function () {
     timer.vm.init();
-    timer.vm.getTimeDiff();
     timer.tick();
   };
 
