@@ -1,5 +1,5 @@
 {
-  "name": "minuteCountdown",
+  "name": "minutes-to-quitting-time",
   "version": "0.1.0",
   "authors": [
     "Brandon <bdhesse@gmail.com>"
@@ -15,8 +15,6 @@
     "tests"
   ],
   "dependencies": {
-    "q": "~1.0",
-    "lodash": "~3.9.3",
     "mithril": "~0.2.0",
     "momentjs": "~2.10.3"
   }

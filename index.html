@@ -6,85 +6,8 @@
 </head>
 <body>
 <script src="bower_components/mithril/mithril.min.js"></script>
-<script src="bower_components/q/q.js"></script>
 <script src="bower_components/momentjs/min/moment.min.js"></script>
-<script src="bower_components/lodash/lodash.min.js"></script>
 <script>
-  var timeout = (function () {
-    function sliceArgs(args, offset) {
-      return Array.prototype.slice.call(args, offset);
-    }
-
-    var remainingTimeouts = 0;
-    var pendingTimeouts = {};
-    var deferreds = {};
-
-    function completeOutstandingRequests(fn) {
-      try {
-        fn.apply(null, sliceArgs(arguments, 1));
-      } finally {
-        remainingTimeouts -= 1;
-      }
-    }
-
-    var defer = function (fn, delay) {
-      var timeoutId;
-      remainingTimeouts += 1;
-      timeoutId = setTimeout(function () {
-        delete pendingTimeouts[timeoutId];
-        completeOutstandingRequests(fn);
-      }, delay || 0);
-      pendingTimeouts[timeoutId] = true;
-      return timeoutId;
-    };
-
-    defer.cancel = function (deferId) {
-      if (pendingTimeouts[deferId]) {
-        delete pendingTimeouts[deferId];
-        clearTimeout(deferId);
-        completeOutstandingRequests(function () {
-        });
-        return true;
-      }
-
-      return false;
-    };
-
-    function timeout(fn, delay) {
-      var args = sliceArgs(arguments, 2),
-          deferred = Q.defer(),
-          promise = deferred.promise,
-          timeoutId;
-
-      timeoutId = defer(function () {
-        try {
-          deferred.resolve(fn.apply(null, args));
-        } catch (e) {
-          deferred.reject(e);
-        } finally {
-          delete deferreds[promise.__timeoutId];
-        }
-      }, delay);
-
-      promise.__timeoutId = timeoutId;
-      deferreds[timeoutId] = deferred;
-
-      return promise;
-    }
-
-    timeout.cancel = function (promise) {
-      if (promise && Object.keys(deferreds).indexOf(promise.__timeoutId) !== -1) {
-        deferreds[promise.__timeoutId].reject('canceled');
-        delete deferreds[promise.__timeoutId];
-        return defer.cancel(promise.__timeoutId);
-      }
-
-      return false;
-    };
-
-    return timeout;
-  })();
-
   function nextFriday(date) {
     var input, output;
     input = moment(date);
@@ -92,11 +15,20 @@
     return output > input ? output : output.add(7, 'days');
   }
 
-  var timer = {};
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
-  timer.Timer = function (data) {
-    this.endTime = m.prop(data.endTime);
-  };
+  function sample(arr) {
+    if (!Array.isArray(arr)) {
+      console.error('not an array');
+      return false;
+    }
+
+    return arr[randomInt(0, arr.length - 1)];
+  }
+
+  var timer = {}, intervalId;
 
   timer.phrases = [
     'a watched kettle never boils',
@@ -125,7 +57,7 @@
       vm.time = moment();
       vm.endTime = nextFriday(vm.time);
       vm.remaining = m.prop(0);
-      vm.phrase = m.prop(_.sample(timer.phrases));
+      vm.phrase = m.prop(sample(timer.phrases));
 
       vm.getTimeDiff = function () {
         vm.time = moment();
@@ -155,27 +87,23 @@
 
   timer.tick = function __updateTick() {
     m.startComputation();
-    timeout(function __timeout() {
-      var finished = timer.vm.getTimeDiff();
-      if (finished) {
-        timer.vm.endTime = nextFriday(timer.vm.time);
-      }
-      if (_.random(1, 10) < 2) {
-        timer.vm.phrase(_.sample(timer.phrases));
-      }
-      m.endComputation();
-      timer.tick();
-    }, 4000);
+    var finished = timer.vm.getTimeDiff();
+    if (finished) {
+      timer.vm.endTime = nextFriday(timer.vm.time);
+    }
+    if (randomInt(0, 9) < 1) {
+      timer.vm.phrase(sample(timer.phrases));
+    }
+    m.endComputation();
   };
 
   timer.controller = function () {
     timer.vm.init();
     timer.vm.getTimeDiff();
+    timer.tick();
   };
 
   m.mount(document.body, {controller: timer.controller, view: timer.view});
-  timeout(function () {
-    timer.tick();
-  });
+  intervalId = setInterval(timer.tick, 5000);
 </script>
 </body>
