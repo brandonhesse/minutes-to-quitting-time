@@ -50,25 +50,27 @@
     'a man who dares to waste one hour of time has not discovered the value of life.'
   ];
 
-  timer.Timer = function __buildTimer(time) {
-    var obj = Object.create({
-      getMinutesFromNow: function __diff() {
+  timer.Timer = (function __buildTimer() {
+    var prototype = {
+      getMinutesFromNow: function getMinutesFromNow() {
         return this.time.diff(moment(), 'minutes');
       },
 
-      getSecondsFromNow: function __diff() {
+      getSecondsFromNow: function getSecondsFromNow() {
         return this.time.diff(moment(), 'seconds');
       },
 
-      isFinished: function __complete() {
+      isFinished: function isFinished() {
         return this.time < moment();
       }
-    });
+    };
 
-    obj.time = time;
-
-    return obj;
-  };
+    return function Timer(time) {
+      var obj = Object.create(prototype);
+      obj.time = time;
+      return obj;
+    };
+  })();
 
   timer.vm = (function () {
     var vm = {};
