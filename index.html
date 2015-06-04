@@ -28,7 +28,7 @@
     return arr[randomInt(0, arr.length - 1)];
   }
 
-  var timer = {}, intervalId;
+  var timer = {};
 
   timer.phrases = [
     'a watched kettle never boils',
@@ -50,7 +50,7 @@
     'a man who dares to waste one hour of time has not discovered the value of life.'
   ];
 
-  timer.Timer = (function __buildTimer() {
+  timer.Timer = (function buildTimer() {
     var prototype = {
       getMinutesFromNow: function getMinutesFromNow() {
         return this.time.diff(moment(), 'minutes');
@@ -115,11 +115,12 @@
   };
 
   timer.controller = function () {
+    var intervalId;
     timer.vm.init();
     timer.vm.update();
+    intervalId = setInterval(timer.vm.update, 5000);
   };
 
   m.mount(document.body, {controller: timer.controller, view: timer.view});
-  intervalId = setInterval(timer.vm.update, 5000);
 </script>
 </body>
