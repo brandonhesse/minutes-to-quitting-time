@@ -113,6 +113,6 @@ function quittingTime(mount) {
       intervalId = setInterval(vm.update.bind(vm), 5000);
     };
 
-    return m.mount(dom, {controller: controller, view: view});
+    m.mount(dom, {controller: controller, view: view});
   })(m, moment, mount);
 }
