@@ -8,7 +8,7 @@
 <script src="bower_components/mithril/mithril.min.js"></script>
 <script src="bower_components/momentjs/min/moment.min.js"></script>
 <script>
-  (function(m, moment, timer, undefined) {
+  (function(m, moment, undefined) {
     'use strict';
 
     function nextFriday(date) {
@@ -31,7 +31,7 @@
       return arr[randomInt(0, arr.length - 1)];
     }
 
-    timer.phrases = [
+     var phrases = [
       'a watched kettle never boils',
       'time flies when you\'re having fun.',
       'keep staring: I won\'t go any faster.',
@@ -51,7 +51,7 @@
       'a man who dares to waste one hour of time has not discovered the value of life.'
     ];
 
-    timer.Timer = (function buildTimer(moment) {
+    var Timer = (function buildTimer(moment) {
       var prototype = {
         getMinutesFromNow: function getMinutesFromNow() {
           return this.time.diff(moment(), 'minutes');
@@ -73,12 +73,12 @@
       };
     })(moment);
 
-    var vm = timer.vm = (function (timer, m) {
+    var vm = (function (m) {
 
       function vmInit() {
-        this.endTime = timer.Timer(nextFriday());
+        this.endTime = Timer(nextFriday());
         this.remaining = m.prop(0);
-        this.phrase = m.prop(sample(timer.phrases));
+        this.phrase = m.prop(sample(phrases));
         this.update();
       }
 
@@ -87,11 +87,11 @@
 
         this.remaining(this.endTime.getMinutesFromNow());
         if(this.endTime.isFinished()) {
-          this.endTime = timer.Timer(nextFriday());
+          this.endTime = Timer(nextFriday());
         }
 
         if (randomInt(0, 9) < 1) { // Random change
-          this.phrase(sample(timer.phrases));
+          this.phrase(sample(phrases));
         }
 
         m.endComputation();
@@ -101,9 +101,9 @@
         init: vmInit,
         update: vmUpdate
       };
-    })(timer, m);
+    })(m);
 
-    timer.view = function () {
+    var view = function () {
       return m('html', [
         m('body', [
           m('div.content', [
@@ -118,13 +118,13 @@
       ]);
     };
 
-    timer.controller = function () {
+    var controller = function () {
       var intervalId;
       vm.init();
       intervalId = setInterval(vm.update.bind(vm), 5000);
     };
 
-    m.mount(document.body, {controller: timer.controller, view: timer.view});
-  })(m, moment, {});
+    m.mount(document.body, {controller: controller, view: view});
+  })(m, moment);
 </script>
 </body>
