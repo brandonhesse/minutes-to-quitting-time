@@ -73,30 +73,33 @@
   })();
 
   timer.vm = (function () {
-    var vm = {};
 
-    vm.init = function () {
-      vm.endTime = timer.Timer(nextFriday());
-      vm.remaining = m.prop(0);
-      vm.phrase = m.prop(sample(timer.phrases));
-    };
+    function vmInit() {
+      this.endTime = timer.Timer(nextFriday());
+      this.remaining = m.prop(0);
+      this.phrase = m.prop(sample(timer.phrases));
+      this.update();
+    }
 
-    vm.update = function () {
+    function vmUpdate() {
       m.startComputation();
 
-      vm.remaining(vm.endTime.getMinutesFromNow());
-      if(vm.endTime.isFinished()) {
-        vm.endTime = timer.Timer(nextFriday());
+      this.remaining(this.endTime.getMinutesFromNow());
+      if(this.endTime.isFinished()) {
+        this.endTime = timer.Timer(nextFriday());
       }
 
       if (randomInt(0, 9) < 1) { // Random change
-        vm.phrase(sample(timer.phrases));
+        this.phrase(sample(timer.phrases));
       }
 
       m.endComputation();
-    };
+    }
 
-    return vm;
+    return {
+      init: vmInit,
+      update: vmUpdate
+    };
   })();
 
   timer.view = function () {
@@ -117,8 +120,7 @@
   timer.controller = function () {
     var intervalId;
     timer.vm.init();
-    timer.vm.update();
-    intervalId = setInterval(timer.vm.update, 5000);
+    intervalId = setInterval(timer.vm.update.bind(timer.vm), 5000);
   };
 
   m.mount(document.body, {controller: timer.controller, view: timer.view});
